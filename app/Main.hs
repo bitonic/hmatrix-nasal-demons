@@ -8,9 +8,12 @@ import Control.Monad
 import Control.Exception
 import System.Mem
 import Control.Concurrent.Async
+import System.Environment
 
 main :: IO ()
 main = do
+  [matSizeS] <- getArgs
+  let matSize = read matSizeS
   let gcs = do
         performMinorGC
         performMajorGC
@@ -21,8 +24,8 @@ main = do
         matrices i = if i > 100
           then []
           else let
-            a :: Matrix Double = (3 >< 3) (take 9 [fromIntegral i..])
+            a :: Matrix Double = (matSize >< matSize) (take (matSize * matSize) [fromIntegral i..])
             in a : matrices (i+1)
     forM_ (cycle (matrices i0)) $ \a -> do
       let (l, m, r) = svd a
-      evaluate (force (l <> diagRect 0 m 3 3 <> tr r))
+      evaluate (force (l <> diagRect 0 m matSize matSize <> tr r))
