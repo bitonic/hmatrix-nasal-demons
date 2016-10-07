@@ -21,11 +21,11 @@ main = do
   caps <- getNumCapabilities
   void $ concurrently gcs $ flip mapConcurrently [1..caps] $ \i0 -> do
     let matrices :: Int -> [Matrix Double]
-        matrices i = if i > 100
-          then []
+        matrices i = if i == 10000
+          then matrices (-10000)
           else let
             a :: Matrix Double = (matSize >< matSize) (take (matSize * matSize) [fromIntegral i..])
             in a : matrices (i+1)
-    forM_ (cycle (matrices i0)) $ \a -> do
+    forM_ (matrices i0) $ \a -> do
       let (l, m, r) = svd a
       evaluate (force (l <> diagRect 0 m matSize matSize <> tr r))
